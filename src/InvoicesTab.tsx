@@ -7,7 +7,7 @@ type Inv = {
 };
 
 export default function InvoicesTab({ onSeen }: { onSeen: () => void }) {
-  const [year, setYear] = useState<number | ''>(new Date().getFullYear());
+  const [year, setYear] = useState<number | ''>('');
   const [q, setQ] = useState('');
   const [rows, setRows] = useState<Inv[] | null>(null);
   const [years, setYears] = useState<number[]>([]);
