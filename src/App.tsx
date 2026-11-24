@@ -6,8 +6,9 @@ import ZTab from './ZTab';
 import InvoicesTab from './InvoicesTab';
 import AccountingTab from './AccountingTab';
 import SuppliersTab from './SuppliersTab';
+import PricesTab from './PricesTab';
 
-type Tab = 'acc' | 'z' | 'inv' | 'sup';
+type Tab = 'acc' | 'z' | 'inv' | 'sup' | 'price';
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
@@ -62,6 +63,7 @@ export default function App() {
             Τιμολόγια {newCount > 0 && <span className="badge">{newCount}</span>}
           </button>
           <button className={'tab ' + (tab === 'sup' ? 'active' : '')} onClick={() => setTab('sup')}>Προμηθευτές</button>
+          <button className={'tab ' + (tab === 'price' ? 'active' : '')} onClick={() => setTab('price')}>Τιμές ειδών</button>
         </nav>
         <button className="logout" onClick={() => setSetPw(true)}>Κωδικός</button>
         <button className="logout" onClick={() => supabase.auth.signOut()}>Έξοδος</button>
@@ -71,6 +73,7 @@ export default function App() {
         {tab === 'z' && <ZTab />}
         {tab === 'inv' && <InvoicesTab onSeen={refreshNew} />}
         {tab === 'sup' && <SuppliersTab />}
+        {tab === 'price' && <PricesTab />}
       </main>
       {setPw && <SetPassword canCancel onDone={() => { setSetPw(false); window.history.replaceState(null, '', '/'); }} />}
     </>

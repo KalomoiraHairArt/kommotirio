@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase, eur, dmy, INVOICE_TYPES } from './supabase';
+import { AttachmentsModal, ClipButton, useFileCounts } from './Attachments';
 
 type Inv = {
   id: number; mark: number; issuer_vat: string; series: string | null; aa: string | null; issue_date: string; invoice_type: string;
@@ -12,6 +13,8 @@ export default function InvoicesTab({ onSeen }: { onSeen: () => void }) {
   const [rows, setRows] = useState<Inv[] | null>(null);
   const [years, setYears] = useState<number[]>([]);
   const [busy, setBusy] = useState(false);
+  const { counts, refresh: refreshFiles } = useFileCounts();
+  const [attach, setAttach] = useState<Inv | null>(null);
 
   const load = () => {
     let query = supabase.from('invoices_with_supplier').select('*').order('issue_date', { ascending: false }).order('mark', { ascending: false });
@@ -71,7 +74,7 @@ export default function InvoicesTab({ onSeen }: { onSeen: () => void }) {
         {!rows ? <div className="loading">Φόρτωση…</div> : !filtered.length ? <div className="empty">Δεν βρέθηκαν τιμολόγια.</div> : (
           <div className="tablewrap">
             <table>
-              <thead><tr><th>Ημ/νία</th><th>Προμηθευτής</th><th>Είδος</th><th>Αριθμός</th><th className="num">Καθαρά</th><th className="num">ΦΠΑ</th><th className="num">Σύνολο</th></tr></thead>
+              <thead><tr><th>Ημ/νία</th><th>Προμηθευτής</th><th>Είδος</th><th>Αριθμός</th><th className="num">Καθαρά</th><th className="num">ΦΠΑ</th><th className="num">Σύνολο</th><th></th></tr></thead>
               <tbody>
                 {filtered.map((r) => (
                   <tr key={r.id} className={r.is_new ? 'newrow' : ''}>
@@ -82,6 +85,7 @@ export default function InvoicesTab({ onSeen }: { onSeen: () => void }) {
                     <td className="num">{eur(Number(r.net_total) * (r.sign || 1))}</td>
                     <td className="num">{eur(Number(r.vat_total) * (r.sign || 1))}</td>
                     <td className="num"><b className={r.sign < 0 ? 'pos' : ''}>{eur(Number(r.gross_total) * (r.sign || 1))}</b></td>
+                    <td><ClipButton count={counts.get(r.id) ?? 0} onClick={() => setAttach(r)} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -89,6 +93,10 @@ export default function InvoicesTab({ onSeen }: { onSeen: () => void }) {
           </div>
         )}
       </div>
+      {attach && (
+        <AttachmentsModal invoiceId={attach.id} title={`${attach.supplier} · ${[attach.series, attach.aa].filter(Boolean).join(' ')} · ${dmy(attach.issue_date)}`}
+          onClose={() => setAttach(null)} onChanged={refreshFiles} />
+      )}
     </>
   );
 }

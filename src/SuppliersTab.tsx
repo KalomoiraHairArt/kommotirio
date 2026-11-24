@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase, eur, dmy, INVOICE_TYPES } from './supabase';
+import { AttachmentsModal, ClipButton, useFileCounts } from './Attachments';
 
 type Inv = {
   id: number; mark: number; issuer_vat: string; series: string | null; aa: string | null; issue_date: string; invoice_type: string;
@@ -20,6 +21,8 @@ export default function SuppliersTab() {
   const [sort, setSort] = useState<'total' | 'year' | 'last' | 'name'>('total');
   const [open, setOpen] = useState<string | null>(null);
   const [year, setYear] = useState<number | ''>('');
+  const { counts, refresh: refreshFiles } = useFileCounts();
+  const [attach, setAttach] = useState<Inv | null>(null);
 
   useEffect(() => {
     supabase.from('invoices_with_supplier').select('id,mark,issuer_vat,series,aa,issue_date,invoice_type,net_total,vat_total,gross_total,sign,is_new,supplier')
@@ -92,7 +95,7 @@ export default function SuppliersTab() {
         <div className="card">
           <div className="tablewrap">
             <table>
-              <thead><tr><th>Ημ/νία</th><th>Είδος</th><th>Αριθμός</th><th>ΜΑΡΚ</th><th className="num">Καθαρά</th><th className="num">ΦΠΑ</th><th className="num">Σύνολο</th></tr></thead>
+              <thead><tr><th>Ημ/νία</th><th>Είδος</th><th>Αριθμός</th><th>ΜΑΡΚ</th><th className="num">Καθαρά</th><th className="num">ΦΠΑ</th><th className="num">Σύνολο</th><th></th></tr></thead>
               <tbody>
                 {selInv.map((r) => (
                   <tr key={r.id} className={r.is_new ? 'newrow' : ''}>
@@ -103,16 +106,21 @@ export default function SuppliersTab() {
                     <td className="num">{eur(n(r.net_total) * (r.sign || 1))}</td>
                     <td className="num">{eur(n(r.vat_total) * (r.sign || 1))}</td>
                     <td className="num"><b className={r.sign < 0 ? 'pos' : ''}>{eur(n(r.gross_total) * (r.sign || 1))}</b></td>
+                    <td><ClipButton count={counts.get(r.id) ?? 0} onClick={() => setAttach(r)} /></td>
                   </tr>
                 ))}
-                {!selInv.length && <tr><td colSpan={7} className="empty">Κανένα τιμολόγιο.</td></tr>}
+                {!selInv.length && <tr><td colSpan={8} className="empty">Κανένα τιμολόγιο.</td></tr>}
               </tbody>
               {selInv.length > 0 && (
-                <tfoot><tr><td colSpan={4}>Σύνολο</td><td className="num">{eur(sum('net_total'))}</td><td className="num">{eur(sum('vat_total'))}</td><td className="num">{eur(sum('gross_total'))}</td></tr></tfoot>
+                <tfoot><tr><td colSpan={4}>Σύνολο</td><td className="num">{eur(sum('net_total'))}</td><td className="num">{eur(sum('vat_total'))}</td><td className="num">{eur(sum('gross_total'))}</td><td /></tr></tfoot>
               )}
             </table>
           </div>
         </div>
+        {attach && (
+          <AttachmentsModal invoiceId={attach.id} title={`${sel.label} · ${[attach.series, attach.aa].filter(Boolean).join(' ')} · ${dmy(attach.issue_date)}`}
+            onClose={() => setAttach(null)} onChanged={refreshFiles} />
+        )}
       </>
     );
   }
