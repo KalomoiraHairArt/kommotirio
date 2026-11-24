@@ -17,8 +17,8 @@ export default function EsendPanel() {
 
   // Το React μπλοκάρει τα javascript: links στο JSX, οπότε το βάζουμε απευθείας στο DOM.
   useEffect(() => {
-    if (help && linkRef.current && info?.bookmarklet) linkRef.current.setAttribute('href', info.bookmarklet);
-  }, [help, info]);
+    if (linkRef.current && info?.bookmarklet) linkRef.current.setAttribute('href', info.bookmarklet);
+  }, [info]);
 
   const copy = async () => {
     if (!info?.bookmarklet) return;
@@ -38,8 +38,11 @@ export default function EsendPanel() {
           </div>
         </div>
         <div className="filters">
-          <a className="btn" href={ESEND_URL} target="_blank" rel="noopener noreferrer">Άνοιγμα e-send ↗</a>
-          <button className="btn ghost" onClick={() => setHelp(!help)}>{help ? 'Κλείσιμο' : 'Πώς φέρνω τα νέα Ζ;'}</button>
+          <a className="btn" href={ESEND_URL} target="_blank" rel="noopener noreferrer">1. Άνοιγμα e-send ↗</a>
+          {info?.bookmarklet && (
+            <a ref={linkRef} className="bookmarklet" onClick={(e) => { e.preventDefault(); setHelp(true); }} title="Σύρε με στη γραμμή σελιδοδεικτών">⬇ Λήψη Ζ</a>
+          )}
+          <button className="btn ghost" onClick={() => setHelp(!help)}>{help ? 'Κλείσιμο' : 'Οδηγίες'}</button>
         </div>
       </div>
 
@@ -51,12 +54,9 @@ export default function EsendPanel() {
             <li>Θα δεις μήνυμα «Αποθηκεύτηκαν Χ νέα Ζ». Γύρνα εδώ και κάνε ανανέωση.</li>
           </ol>
           <div className="small muted" style={{ marginTop: 8 }}>
-            <b>Δεν έχεις το κουμπί «Λήψη Ζ»;</b> Σε υπολογιστή, σύρε το παρακάτω κουμπί με το ποντίκι πάνω στη γραμμή σελιδοδεικτών (Ctrl+Shift+B για να εμφανιστεί):
+            <b>Δεν έχεις το κουμπί «Λήψη Ζ»;</b> Σε υπολογιστή, σύρε το πορτοκαλί κουμπί «⬇ Λήψη Ζ» (πάνω δεξιά σε αυτό το πλαίσιο) με το ποντίκι πάνω στη γραμμή σελιδοδεικτών (Ctrl+Shift+B για να εμφανιστεί):
           </div>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginTop: 10 }}>
-            {info?.bookmarklet ? (
-              <a ref={linkRef} className="bookmarklet" onClick={(e) => e.preventDefault()} title="Σύρε με στη γραμμή σελιδοδεικτών">⬇ Λήψη Ζ</a>
-            ) : <span className="muted small">Δεν βρέθηκε το κουμπί.</span>}
             <button className="btn ghost" onClick={copy}>{copied ? '✔ Αντιγράφηκε' : 'Αντιγραφή συνδέσμου'}</button>
           </div>
           <div className="small muted" style={{ marginTop: 8 }}>
