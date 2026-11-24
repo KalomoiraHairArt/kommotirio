@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase, eur, dmy, INVOICE_TYPES } from './supabase';
-import { AttachmentsModal, ClipButton, useFileCounts } from './Attachments';
+import { AttachmentsModal, ClipButton, DocLink, useFileCounts } from './Attachments';
 
 type Inv = {
   id: number; mark: number; issuer_vat: string; series: string | null; aa: string | null; issue_date: string; invoice_type: string;
-  net_total: number; vat_total: number; gross_total: number; sign: number; is_new: boolean; supplier: string; supplier_activity: string | null;
+  net_total: number; vat_total: number; gross_total: number; sign: number; is_new: boolean; supplier: string; download_url: string | null; qr_url: string | null; supplier_activity: string | null;
 };
 
 export default function InvoicesTab({ onSeen }: { onSeen: () => void }) {
@@ -85,7 +85,7 @@ export default function InvoicesTab({ onSeen }: { onSeen: () => void }) {
                     <td className="num">{eur(Number(r.net_total) * (r.sign || 1))}</td>
                     <td className="num">{eur(Number(r.vat_total) * (r.sign || 1))}</td>
                     <td className="num"><b className={r.sign < 0 ? 'pos' : ''}>{eur(Number(r.gross_total) * (r.sign || 1))}</b></td>
-                    <td><ClipButton count={counts.get(r.id) ?? 0} onClick={() => setAttach(r)} /></td>
+                    <td><div className="docs"><DocLink downloadUrl={r.download_url} qrUrl={r.qr_url} /><ClipButton count={counts.get(r.id) ?? 0} onClick={() => setAttach(r)} /></div></td>
                   </tr>
                 ))}
               </tbody>

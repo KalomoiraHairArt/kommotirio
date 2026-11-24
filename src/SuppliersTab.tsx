@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase, eur, dmy, INVOICE_TYPES } from './supabase';
-import { AttachmentsModal, ClipButton, useFileCounts } from './Attachments';
+import { AttachmentsModal, ClipButton, DocLink, useFileCounts } from './Attachments';
 
 type Inv = {
   id: number; mark: number; issuer_vat: string; series: string | null; aa: string | null; issue_date: string; invoice_type: string;
-  net_total: number; vat_total: number; gross_total: number; sign: number; is_new: boolean; supplier: string;
+  net_total: number; vat_total: number; gross_total: number; sign: number; is_new: boolean; supplier: string; download_url: string | null; qr_url: string | null;
 };
 type Supplier = {
   vat: string; name: string | null; commercial_title: string | null; activity: string | null; address: string | null; doy: string | null; is_active: boolean | null;
@@ -25,7 +25,7 @@ export default function SuppliersTab() {
   const [attach, setAttach] = useState<Inv | null>(null);
 
   useEffect(() => {
-    supabase.from('invoices_with_supplier').select('id,mark,issuer_vat,series,aa,issue_date,invoice_type,net_total,vat_total,gross_total,sign,is_new,supplier')
+    supabase.from('invoices_with_supplier').select('id,mark,issuer_vat,series,aa,issue_date,invoice_type,net_total,vat_total,gross_total,sign,is_new,supplier,download_url,qr_url')
       .order('issue_date', { ascending: false }).range(0, 9999).then(({ data }) => setInvoices((data as Inv[]) ?? []));
     supabase.from('suppliers').select('vat,name,commercial_title,activity,address,doy,is_active').then(({ data }) => setSuppliers((data as Supplier[]) ?? []));
   }, []);
@@ -106,7 +106,7 @@ export default function SuppliersTab() {
                     <td className="num">{eur(n(r.net_total) * (r.sign || 1))}</td>
                     <td className="num">{eur(n(r.vat_total) * (r.sign || 1))}</td>
                     <td className="num"><b className={r.sign < 0 ? 'pos' : ''}>{eur(n(r.gross_total) * (r.sign || 1))}</b></td>
-                    <td><ClipButton count={counts.get(r.id) ?? 0} onClick={() => setAttach(r)} /></td>
+                    <td><div className="docs"><DocLink downloadUrl={r.download_url} qrUrl={r.qr_url} /><ClipButton count={counts.get(r.id) ?? 0} onClick={() => setAttach(r)} /></div></td>
                   </tr>
                 ))}
                 {!selInv.length && <tr><td colSpan={8} className="empty">Κανένα τιμολόγιο.</td></tr>}

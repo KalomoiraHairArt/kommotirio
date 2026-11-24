@@ -27,6 +27,19 @@ export function ClipButton({ count, onClick }: { count: number; onClick: () => v
   );
 }
 
+/** Σύνδεσμος για την εμπορική μορφή (από τον πάροχο ηλ. τιμολόγησης) ή, αλλιώς, για τη σελίδα QR της ΑΑΔΕ. */
+export function DocLink({ downloadUrl, qrUrl }: { downloadUrl?: string | null; qrUrl?: string | null }) {
+  const url = downloadUrl || qrUrl;
+  if (!url) return null;
+  return (
+    <a className={'doclink ' + (downloadUrl ? 'main' : '')} href={url} target="_blank" rel="noopener noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      title={downloadUrl ? 'Εμπορική μορφή (PDF) από τον πάροχο ηλεκτρονικής τιμολόγησης' : 'Στοιχεία του παραστατικού στην ΑΑΔΕ (QR)'}>
+      {downloadUrl ? '📄 Εμπορική' : 'QR ΑΑΔΕ'}
+    </a>
+  );
+}
+
 const safeName = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-zA-Z0-9._-]+/g, '_').slice(-80) || 'file';
 const kb = (b: number | null) => (b ? (b > 1048576 ? `${(b / 1048576).toFixed(1)} MB` : `${Math.round(b / 1024)} KB`) : '');
 
