@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase, eur, dmy, MONTHS_FULL } from './supabase';
+import EsendPanel from './EsendPanel';
 
 type Z = {
   fhm: string; znr: number; file_date: string; transmitted_at: string | null; gross_total: number; vat_total: number; net_total: number;
@@ -64,6 +65,8 @@ export default function ZTab() {
           </select>
         </div>
       </div>
+
+      <EsendPanel />
 
       <div className="kpis">
         <div className="kpi income"><div className="label">Τζίρος</div><div className="value">{eur(t.gross)}</div><div className="sub">{t.count} Ζ · {t.receipts} αποδείξεις</div></div>
